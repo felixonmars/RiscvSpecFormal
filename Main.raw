@@ -50,7 +50,16 @@ offset = 2147483648
 meths :: IORef Int -> IORef Int -> [(String, Val -> FileState -> M.Map String Val -> IO Val)]
 meths steps counter =
   [("proc_core_pc", proc_core_meth steps counter),
-   ("proc_core_ext_interrupt_pending", io_meth steps counter)]
+   ("proc_core_ext_interrupt_pending", io_meth steps counter),
+   ("proc_core_exception", proc_core_exception steps counter)]
+
+proc_core_exception :: IORef Int -> IORef Int -> Val -> FileState -> M.Map String Val -> IO Val
+proc_core_exception steps counter v filestate regstate =
+  let exception = boolCoerce v in
+    if exception then do hPutStrLn handle "BAD BAD BAD BAD BAD: exception when attempting to execute stale memory!!!"
+                         hPutStrLn stderr "BAD BAD BAD BAD BAD: exception when attempting to execute stale memory!!!"
+                         exitFailure
+    else return $ BVVal BV.nil
 
 io_meth :: IORef Int -> IORef Int -> Val -> FileState -> M.Map String Val -> IO Val
 io_meth steps counter v filestate regstate = do
